@@ -1,0 +1,18 @@
+{
+  "clients": [
+    {
+      "name": "demo-bank",
+      "environment": "qa",
+      "customerId": "12212",
+      "username": "john",
+      "password": "demo"
+    },
+    {
+      "name": "regression-bank",
+      "environment": "regression",
+      "customerId": "12212",
+      "username": "john",
+      "password": "demo"
+    }
+  ]
+}

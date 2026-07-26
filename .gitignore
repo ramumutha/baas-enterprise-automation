@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# Playwright & Allure Test Outputs
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+allure-results/
+allure-report/
+
+# Local Environment Overrides & Secrets
+.env.local
+
+# Project Summary
+project_summary.txt

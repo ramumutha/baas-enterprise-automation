@@ -1,0 +1,30 @@
+{
+  "name": "baas-enterprise-automation",
+  "version": "1.0.0",
+  "description": "Enterprise QA Architect Playwright Framework",
+  "main": "index.js",
+  "scripts": {
+    "test:qa": "dotenv -e .env.qa -- npx playwright test",
+    "test:regression": "dotenv -e .env.regression -- npx playwright test",
+    "test:ui": "dotenv -e .env.qa -- npx playwright test --grep @UI",
+    "test:api": "dotenv -e .env.qa -- npx playwright test --grep @API",
+    "test:smoke": "dotenv -e .env.qa -- npx playwright test --grep @smoke",
+    "test:regression-tags": "dotenv -e .env.qa -- npx playwright test --grep @regression",
+    "test:critical": "dotenv -e .env.qa -- npx playwright test --grep @critical",
+    "test:matrix": "dotenv -e .env.qa -- npx playwright test --grep @matrix",
+    "test:ci": "npx playwright test",
+    "report": "npx allure serve allure-results",
+    "report:summary": "node scripts/generate-report-summary.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.42.0",
+    "@types/node": "^20.11.0",
+    "allure-playwright": "^2.13.0",
+    "dotenv": "^16.4.5",
+    "dotenv-cli": "^7.4.1",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "pdfkit": "^0.19.1"
+  }
+}

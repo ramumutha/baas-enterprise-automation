@@ -1,0 +1,88 @@
+name: Playwright Regression
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'qa'
+        type: choice
+        options:
+          - qa
+          - regression
+          - preprod
+          - prod
+      suite:
+        description: 'Suite to execute'
+        required: true
+        default: 'smoke'
+        type: choice
+        options:
+          - smoke
+          - regression
+          - critical
+          - ui
+          - api
+      client:
+        description: 'Optional client name for matrix-driven runs'
+        required: false
+        default: ''
+        type: string
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: [qa, regression]
+    env:
+      ENV: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || matrix.environment }}
+      CLIENT_NAME: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.client || '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npx playwright install --with-deps
+      - name: Run selected Playwright suite
+        run: |
+          SUITE="${{ github.event_name == 'workflow_dispatch' && github.event.inputs.suite || 'smoke' }}"
+          case "$SUITE" in
+            smoke)
+              npx playwright test --grep @smoke
+              ;;
+            regression)
+              npx playwright test --grep @regression
+              ;;
+            critical)
+              npx playwright test --grep @critical
+              ;;
+            ui)
+              npx playwright test --grep @ui
+              ;;
+            api)
+              npx playwright test --grep @api
+              ;;
+            *)
+              npx playwright test --grep @smoke
+              ;;
+          esac
+      - name: Generate test summary
+        if: always()
+        run: npm run report:summary
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-${{ env.ENV }}
+          path: |
+            playwright-report/
+            test-results/
+            allure-results/
+            reports/

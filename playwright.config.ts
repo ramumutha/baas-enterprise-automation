@@ -1,0 +1,45 @@
+import { defineConfig, devices } from '@playwright/test';
+import { loadConfig } from './src/config/environment';
+
+const runtimeConfig = loadConfig(process.env.ENV);
+
+console.log(`[TARGET ENVIRONMENT]: Executing tests on ${runtimeConfig.environmentName} -> ${runtimeConfig.baseUrl}`);
+
+export default defineConfig({
+  testDir: './src/tests',
+  fullyParallel: true,
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 2 : 0,
+  workers: process.env.CI ? 4 : undefined,
+  reporter: [
+    ['html', { open: 'never' }],
+    ['allure-playwright', { outputFolder: 'allure-results' }],
+    ['list']
+  ],
+  use: {
+    baseURL: runtimeConfig.baseUrl,
+    trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
+    extraHTTPHeaders: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    }
+  },
+  projects: [
+    {
+      name: 'API-Suite',
+      testMatch: /.*api\.spec\.ts/
+    },
+    {
+      name: 'Chromium-UI',
+      use: { ...devices['Desktop Chrome'] },
+      testIgnore: /.*api\.spec\.ts/
+    },
+    {
+      name: 'Firefox-UI',
+      use: { ...devices['Desktop Firefox'] },
+      testIgnore: /.*api\.spec\.ts/
+    }
+  ]
+});
