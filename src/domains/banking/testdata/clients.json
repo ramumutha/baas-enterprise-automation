@@ -4,15 +4,13 @@
       "name": "demo-bank",
       "environment": "qa",
       "customerId": "12212",
-      "username": "john",
-      "password": "demo"
+      "credentialRef": "BANKING_DEMO_BANK"
     },
     {
       "name": "regression-bank",
       "environment": "regression",
       "customerId": "12212",
-      "username": "john",
-      "password": "demo"
+      "credentialRef": "BANKING_REGRESSION_BANK"
     }
   ]
 }

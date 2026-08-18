@@ -13,6 +13,7 @@
     "test:critical": "dotenv -e .env.qa -- npx playwright test --grep @critical",
     "test:matrix": "dotenv -e .env.qa -- npx playwright test --grep @matrix",
     "test:ci": "npx playwright test",
+    "test:framework": "playwright test --config=playwright.framework.config.ts",
     "report": "npx allure serve allure-results",
     "report:summary": "node scripts/generate-report-summary.mjs"
   },

@@ -1,10 +1,15 @@
 import fs from 'fs';
 import path from 'path';
+import { requireSecret } from '../../../core/security/secrets';
 
 export type BankingClientProfile = {
   name: string;
   environment: string;
   customerId: string;
+  credentialRef: string;
+};
+
+export type BankingCredentials = {
   username: string;
   password: string;
 };
@@ -37,4 +42,14 @@ export function resolveClientConfig(environment: string, clientName: string): Ba
   }
 
   return client;
+}
+
+export function resolveBankingCredentials(profile: BankingClientProfile): BankingCredentials {
+  const usernameKey = `${profile.credentialRef}_USERNAME`;
+  const passwordKey = `${profile.credentialRef}_PASSWORD`;
+
+  return {
+    username: requireSecret(usernameKey),
+    password: requireSecret(passwordKey)
+  };
 }

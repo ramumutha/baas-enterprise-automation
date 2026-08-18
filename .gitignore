@@ -11,6 +11,9 @@ allure-report/
 
 # Local Environment Overrides & Secrets
 .env.local
+.env.*.local
+*.secrets.env
+secrets/
 
 # Project Summary
 project_summary.txt
