@@ -1,9 +1,9 @@
 import { test as base } from '@playwright/test';
-import { LoginPage } from '../pages/LoginPage';
-import { TransferFundsPage } from '../pages/TransferFundsPage';
-import { BaasAccountsClient } from '../api/BaasAccountsClient';
+import { LoginPage } from '../domains/banking/pages/LoginPage';
+import { TransferFundsPage } from '../domains/banking/pages/TransferFundsPage';
+import { BaasAccountsClient } from '../domains/banking/api/BaasAccountsClient';
 import { loadConfig } from '../config/environment';
-import { getCustomerProfile } from '../testdata/testData';
+import { getCustomerProfile } from '../domains/banking/testdata/testData';
 import { ClientConfig, getClientsForEnvironment, resolveClientConfig } from '../utils/clientData';
 
 type BaasFixtures = {

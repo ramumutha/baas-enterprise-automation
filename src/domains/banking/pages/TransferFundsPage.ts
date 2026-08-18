@@ -1,5 +1,5 @@
 import { Page, Locator } from '@playwright/test';
-import { BasePage } from './BasePage';
+import { BasePage } from '../../../core/ui/BasePage';
 
 export class TransferFundsPage extends BasePage {
   readonly fromAccountSelect: Locator;

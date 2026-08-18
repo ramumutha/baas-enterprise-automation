@@ -1,7 +1,7 @@
 import { Page, Locator } from '@playwright/test';
-import { BasePage } from './BasePage';
-import { retry } from '../utils/retry';
-import { assertText, assertVisible } from '../utils/assertions';
+import { BasePage } from '../../../core/ui/BasePage';
+import { retry } from '../../../utils/retry';
+import { assertText, assertVisible } from '../../../utils/assertions';
 
 export class LoginPage extends BasePage {
   readonly usernameInput: Locator;

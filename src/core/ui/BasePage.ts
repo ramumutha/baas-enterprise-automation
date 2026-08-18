@@ -1,5 +1,5 @@
 import { Page, Locator, expect } from '@playwright/test';
-import { Logger } from '../utils/Logger';
+import { Logger } from '../../utils/Logger';
 
 export abstract class BasePage {
   readonly page: Page;

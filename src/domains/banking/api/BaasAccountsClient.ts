@@ -1,5 +1,5 @@
 import { APIRequestContext, APIResponse, expect } from '@playwright/test';
-import { Logger } from '../utils/Logger';
+import { Logger } from '../../../utils/Logger';
 
 export class BaasAccountsClient {
   private request: APIRequestContext;

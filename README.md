@@ -151,7 +151,7 @@ If you need to add or modify customer data:
 - update the relevant file in src/testdata
 - keep usernames, passwords, and customer IDs aligned with the intended environment
 
-If you need to add a new client profile, update the client list in src/testdata/clients.json.
+If you need to add a new client profile, update the client list in src/domains/banking/testdata/clients.json.
 
 ---
 

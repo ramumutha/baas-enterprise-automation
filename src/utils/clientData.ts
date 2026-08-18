@@ -10,7 +10,7 @@ export type ClientConfig = {
 };
 
 export function loadClients(): ClientConfig[] {
-  const filePath = path.resolve(__dirname, '../testdata/clients.json');
+  const filePath = path.resolve(__dirname, '../domains/banking/testdata/clients.json');
   const raw = fs.readFileSync(filePath, 'utf-8');
   const parsed = JSON.parse(raw);
   return parsed.clients as ClientConfig[];
