@@ -1,8 +1,8 @@
 import { test, expect } from '../../fixtures/baasFixtures';
 
 test.describe('@API - BaaS Core Banking Microservices', () => {
-  test('TC_API_01: Validate fetching customer account details', { tag: ['@api', '@regression'] }, async ({ accountsApi, customerProfile }) => {
-    const response = await accountsApi.fetchCustomerAccounts(customerProfile.customerId);
+  test('TC_API_01: Validate fetching customer account details', { tag: ['@api', '@regression'] }, async ({ accountsApi, clientConfig }) => {
+    const response = await accountsApi.fetchCustomerAccounts(clientConfig.customerId);
 
     // Assert HTTP status 200 OK
     expect(response.status()).toBe(200);

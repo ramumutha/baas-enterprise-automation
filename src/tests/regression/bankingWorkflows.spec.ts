@@ -1,5 +1,5 @@
 import { test, expect } from '../../fixtures/baasFixtures';
-import { getClientsForEnvironment } from '../../utils/clientData';
+import { getClientsForEnvironment } from '../../domains/banking/testdata/clientData';
 
 const clients = getClientsForEnvironment(process.env.ENV || 'qa');
 

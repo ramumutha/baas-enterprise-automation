@@ -3,25 +3,20 @@ import { LoginPage } from '../domains/banking/pages/LoginPage';
 import { TransferFundsPage } from '../domains/banking/pages/TransferFundsPage';
 import { BaasAccountsClient } from '../domains/banking/api/BaasAccountsClient';
 import { loadConfig, RuntimeConfig } from '../core/config/environment';
-import { getCustomerProfile } from '../domains/banking/testdata/testData';
-import { ClientConfig, getClientsForEnvironment, resolveClientConfig } from '../utils/clientData';
+import { BankingClientProfile, getClientsForEnvironment, resolveClientConfig } from '../domains/banking/testdata/clientData';
 
 type BaasFixtures = {
   loginPage: LoginPage;
   transferPage: TransferFundsPage;
   accountsApi: BaasAccountsClient;
   runtimeConfig: RuntimeConfig;
-  customerProfile: ReturnType<typeof getCustomerProfile>;
-  clientConfig: ClientConfig | undefined;
-  clientConfigs: ClientConfig[];
+  clientConfig: BankingClientProfile;
+  clientConfigs: BankingClientProfile[];
 };
 
 export const test = base.extend<BaasFixtures>({
   runtimeConfig: async ({}, use) => {
     await use(loadConfig(process.env.ENV));
-  },
-  customerProfile: async ({ runtimeConfig }, use) => {
-    await use(getCustomerProfile(runtimeConfig.environment));
   },
   clientConfig: async ({ runtimeConfig }, use) => {
     const selectedClientName = process.env.CLIENT_NAME;
