@@ -5,9 +5,9 @@ export class BaasAccountsClient {
   private request: APIRequestContext;
   private baseUrl: string;
 
-  constructor(request: APIRequestContext) {
+  constructor(request: APIRequestContext, apiBaseUrl: string) {
     this.request = request;
-    this.baseUrl = process.env.API_BASE_URL || '';
+    this.baseUrl = apiBaseUrl;
   }
 
   async fetchCustomerAccounts(customerId: string): Promise<APIResponse> {

@@ -1,9 +1,11 @@
 import { defineConfig, devices } from '@playwright/test';
-import { loadConfig } from './src/config/environment';
+import { loadConfig } from './src/core/config/environment';
 
 const runtimeConfig = loadConfig(process.env.ENV);
 
-console.log(`[TARGET ENVIRONMENT]: Executing tests on ${runtimeConfig.environmentName} -> ${runtimeConfig.baseUrl}`);
+console.log(
+  `[TARGET ENVIRONMENT]: Executing tests on ${runtimeConfig.environment.toUpperCase()} -> ${runtimeConfig.baseUrl}`
+);
 
 export default defineConfig({
   testDir: './src/tests',

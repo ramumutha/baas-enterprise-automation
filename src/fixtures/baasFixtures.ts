@@ -2,7 +2,7 @@ import { test as base } from '@playwright/test';
 import { LoginPage } from '../domains/banking/pages/LoginPage';
 import { TransferFundsPage } from '../domains/banking/pages/TransferFundsPage';
 import { BaasAccountsClient } from '../domains/banking/api/BaasAccountsClient';
-import { loadConfig } from '../config/environment';
+import { loadConfig, RuntimeConfig } from '../core/config/environment';
 import { getCustomerProfile } from '../domains/banking/testdata/testData';
 import { ClientConfig, getClientsForEnvironment, resolveClientConfig } from '../utils/clientData';
 
@@ -10,7 +10,7 @@ type BaasFixtures = {
   loginPage: LoginPage;
   transferPage: TransferFundsPage;
   accountsApi: BaasAccountsClient;
-  runtimeConfig: ReturnType<typeof loadConfig>;
+  runtimeConfig: RuntimeConfig;
   customerProfile: ReturnType<typeof getCustomerProfile>;
   clientConfig: ClientConfig | undefined;
   clientConfigs: ClientConfig[];
@@ -40,8 +40,8 @@ export const test = base.extend<BaasFixtures>({
   transferPage: async ({ page }, use) => {
     await use(new TransferFundsPage(page));
   },
-  accountsApi: async ({ request }, use) => {
-    await use(new BaasAccountsClient(request));
+  accountsApi: async ({ request, runtimeConfig }, use) => {
+    await use(new BaasAccountsClient(request, runtimeConfig.apiBaseUrl));
   }
 });
 

@@ -15,3 +15,9 @@
 ## Items to Add
 
 ## Items Deferred
+
+## EQA.2 — Enterprise Configuration Architecture
+Status: COMPLETE
+
+## Next
+EQA.3 — Test Data Architecture

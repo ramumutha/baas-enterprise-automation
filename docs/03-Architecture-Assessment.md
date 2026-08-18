@@ -96,3 +96,27 @@ Post-refactoring validation confirmed:
 EQA.2 — Configuration Architecture
 
 The next objective is to separate reusable platform configuration from application, domain and environment-specific configuration.
+
+## EQA.2 Assessment
+
+EQA.2 removed hidden application coupling from the reusable configuration layer.
+
+Key improvements:
+
+- configuration moved into the Enterprise QE Core
+- typed RuntimeConfig retained only actively used fields
+- ParaBank fallback URLs removed from core logic
+- invalid environments fail fast
+- required BASE_URL and API_BASE_URL values are validated
+- DB_HOST removed because no database automation capability currently consumes it
+- ENV_NAME removed because environment identity is already represented by the selected environment
+- API clients receive configuration through dependency injection rather than reading process.env directly
+
+Validated results:
+
+- TypeScript compilation: PASS
+- invalid-environment validation: PASS
+- Smoke: 6/6 PASS
+- API: 4/4 PASS
+- UI: 4/4 PASS
+- Full CI: 16/16 PASS

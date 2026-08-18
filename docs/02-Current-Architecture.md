@@ -55,3 +55,22 @@ No business or test behavior was intentionally changed during this refactoring.
 Banking / ParaBank is the first reference implementation.
 
 Future domains may include Healthcare, Insurance, Automotive, Retail, SaaS and Generic Web applications. These domains will be added only when required to prove or deliver actual platform capabilities rather than as empty placeholder structures.
+
+## EQA.2 — Enterprise Configuration Architecture
+
+Runtime configuration is now centralized under:
+
+`src/core/config/environment.ts`
+
+The reusable runtime configuration contract contains only:
+
+- environment
+- baseUrl
+- apiBaseUrl
+- logLevel
+
+Application-specific fallback URLs were removed from the reusable core.
+
+Required configuration values fail fast when missing.
+
+The Banking API client no longer resolves API configuration directly from process environment variables. Configuration is supplied through the shared runtime configuration and fixture lifecycle.
