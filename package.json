@@ -6,10 +6,10 @@
   "scripts": {
     "test:qa": "dotenv -e .env.qa -- npx playwright test",
     "test:regression": "dotenv -e .env.regression -- npx playwright test",
-    "test:ui": "dotenv -e .env.qa -- npx playwright test --grep @UI",
-    "test:api": "dotenv -e .env.qa -- npx playwright test --grep @API",
+"test:ui": "dotenv -e .env.qa -- npx playwright test --project=Chromium-UI --project=Firefox-UI --grep @ui",
+"test:api": "dotenv -e .env.qa -- npx playwright test --project=API-Suite",
     "test:smoke": "dotenv -e .env.qa -- npx playwright test --grep @smoke",
-    "test:regression-tags": "dotenv -e .env.qa -- npx playwright test --grep @regression",
+   "test:regression-tags": "dotenv -e .env.qa -- npx playwright test --grep @regression",
     "test:critical": "dotenv -e .env.qa -- npx playwright test --grep @critical",
     "test:matrix": "dotenv -e .env.qa -- npx playwright test --grep @matrix",
     "test:ci": "npx playwright test",

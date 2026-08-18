@@ -28,20 +28,20 @@ export default defineConfig({
       'Content-Type': 'application/json'
     }
   },
-  projects: [
-    {
-      name: 'API-Suite',
-      testMatch: /.*api\.spec\.ts/
-    },
-    {
-      name: 'Chromium-UI',
-      use: { ...devices['Desktop Chrome'] },
-      testIgnore: /.*api\.spec\.ts/
-    },
-    {
-      name: 'Firefox-UI',
-      use: { ...devices['Desktop Firefox'] },
-      testIgnore: /.*api\.spec\.ts/
-    }
-  ]
+ projects: [
+  {
+    name: 'API-Suite',
+    testMatch: '**/api/**/*.spec.ts'
+  },
+  {
+    name: 'Chromium-UI',
+    use: { ...devices['Desktop Chrome'] },
+    testIgnore: '**/api/**/*.spec.ts'
+  },
+  {
+    name: 'Firefox-UI',
+    use: { ...devices['Desktop Firefox'] },
+    testIgnore: '**/api/**/*.spec.ts'
+  }
+]
 });
