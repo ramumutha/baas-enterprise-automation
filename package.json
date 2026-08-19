@@ -12,10 +12,12 @@
    "test:regression-tags": "dotenv -e .env.qa -- npx playwright test --grep @regression",
     "test:critical": "dotenv -e .env.qa -- npx playwright test --grep @critical",
     "test:matrix": "dotenv -e .env.qa -- npx playwright test --grep @matrix",
-    "test:ci": "npx playwright test",
-    "test:framework": "playwright test --config=playwright.framework.config.ts",
-    "report": "npx allure serve allure-results",
-    "report:summary": "node scripts/generate-report-summary.mjs"
+  "test:ci": "npx playwright test",
+"test:framework": "playwright test --config=playwright.framework.config.ts",
+"test:report": "npm run report:clean && npm run test:ci && npm run report:summary",
+"report": "npx allure serve allure-results",
+"report:clean": "node scripts/clean-test-artifacts.mjs",
+"report:summary": "node scripts/generate-report-summary.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.42.0",

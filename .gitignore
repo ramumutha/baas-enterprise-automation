@@ -8,6 +8,7 @@ blob-report/
 playwright/.cache/
 allure-results/
 allure-report/
+reports/
 
 # Local Environment Overrides & Secrets
 .env.local

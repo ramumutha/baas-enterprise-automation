@@ -31,7 +31,20 @@ function parseResults() {
 }
 
 function formatStatus(status) {
-  return status?.toLowerCase() || 'unknown';
+  const normalizedStatus = status?.toLowerCase();
+  return ['passed', 'failed', 'broken', 'skipped', 'pending'].includes(normalizedStatus)
+    ? normalizedStatus
+    : 'unknown';
+}
+
+function getProject(result) {
+  const parentSuite = result.labels?.find((label) => label.name === 'parentSuite')?.value;
+  return parentSuite || 'Unassigned';
+}
+
+function getValidTimestamp(timestamp) {
+  const value = Number(timestamp);
+  return Number.isFinite(value) && value >= 0 ? value : null;
 }
 
 function buildSummary(results) {
@@ -43,53 +56,146 @@ function buildSummary(results) {
     pending: 0,
     unknown: 0
   };
+  const projects = new Map();
+  const failedTests = [];
+  const starts = [];
+  const stops = [];
 
-  const entries = results.map((result) => {
+  for (const result of results) {
     const status = formatStatus(result.status);
-    if (status in counts) {
-      counts[status] += 1;
-    } else {
-      counts.unknown += 1;
+    const project = getProject(result);
+    const start = getValidTimestamp(result.start);
+    const stop = getValidTimestamp(result.stop);
+
+    counts[status] += 1;
+    if (start !== null) {
+      starts.push(start);
+    }
+    if (stop !== null) {
+      stops.push(stop);
     }
 
-    return {
-      name: result.name || 'Unnamed test',
-      status,
-      uuid: result.uuid || 'n/a'
-    };
-  });
+    if (!projects.has(project)) {
+      projects.set(project, {
+        project,
+        total: 0,
+        passed: 0,
+        failed: 0,
+        broken: 0,
+        skipped: 0,
+        other: 0
+      });
+    }
+
+    const projectCounts = projects.get(project);
+    projectCounts.total += 1;
+    if (status in projectCounts && status !== 'total') {
+      projectCounts[status] += 1;
+    } else {
+      projectCounts.other += 1;
+    }
+
+    if (status === 'failed' || status === 'broken') {
+      failedTests.push({
+        name: result.name || 'Unnamed test',
+        status,
+        project
+      });
+    }
+  }
+
+  const executionStart = starts.length > 0 ? Math.min(...starts) : null;
+  const executionStop = stops.length > 0 ? Math.max(...stops) : null;
+  const durationMs = executionStart !== null && executionStop !== null && executionStop >= executionStart
+    ? executionStop - executionStart
+    : null;
+  const total = results.length;
+  const releaseGate = total === 0 || counts.failed > 0 || counts.broken > 0 ? 'FAIL' : 'PASS';
 
   return {
     generatedAt: new Date().toISOString(),
-    total: entries.length,
+    environment: process.env.ENV || 'qa',
+    executionStart,
+    executionStop,
+    durationMs,
+    durationSeconds: durationMs === null ? null : durationMs / 1000,
+    total,
     counts,
-    entries: entries.slice(0, 20)
+    passRate: total === 0 ? 0 : (counts.passed / total) * 100,
+    releaseGate,
+    projectSummary: [...projects.values()],
+    failedTests
   };
 }
 
 function renderMarkdown(summary) {
   const lines = [];
-  lines.push('# Test Run Summary');
+  lines.push('# Enterprise Test Execution Summary');
   lines.push('');
-  lines.push(`- Generated: ${summary.generatedAt}`);
-  lines.push(`- Total tests: ${summary.total}`);
+  lines.push('## Execution Context');
+  lines.push('');
+  lines.push(`- Generated at: ${summary.generatedAt}`);
+  lines.push(`- Environment: ${summary.environment.toUpperCase()}`);
+lines.push(
+  `- Execution start: ${
+    summary.executionStart === null
+      ? 'Unavailable'
+      : new Date(summary.executionStart).toISOString()
+  }`
+);
+
+lines.push(
+  `- Execution stop: ${
+    summary.executionStop === null
+      ? 'Unavailable'
+      : new Date(summary.executionStop).toISOString()
+  }`
+);
+  lines.push(`- Duration: ${summary.durationMs ?? 'Unavailable'} ms${summary.durationSeconds === null ? '' : ` (${summary.durationSeconds.toFixed(2)} seconds)`}`);
+  lines.push('');
+  lines.push('## Quality Result');
+  lines.push('');
+  lines.push(`- Total: ${summary.total}`);
   lines.push(`- Passed: ${summary.counts.passed}`);
   lines.push(`- Failed: ${summary.counts.failed}`);
   lines.push(`- Broken: ${summary.counts.broken}`);
   lines.push(`- Skipped: ${summary.counts.skipped}`);
   lines.push(`- Pending: ${summary.counts.pending}`);
   lines.push(`- Unknown: ${summary.counts.unknown}`);
+  lines.push(`- Pass rate: ${summary.passRate.toFixed(2)}%`);
   lines.push('');
-  lines.push('## Recent test results');
+  lines.push('## Project Summary');
   lines.push('');
 
-  if (summary.entries.length === 0) {
-    lines.push('- No test result files were found in allure-results.');
+  if (summary.projectSummary.length === 0) {
+    lines.push('- No project results were found.');
   } else {
-    for (const entry of summary.entries) {
-      lines.push(`- ${entry.name} — ${entry.status}`);
+    lines.push('| Project | Total | Passed | Failed | Broken | Skipped | Other |');
+    lines.push('| --- | ---: | ---: | ---: | ---: | ---: | ---: |');
+    for (const project of summary.projectSummary) {
+      lines.push(`| ${project.project} | ${project.total} | ${project.passed} | ${project.failed} | ${project.broken} | ${project.skipped} | ${project.other} |`);
     }
   }
+
+  lines.push('');
+  lines.push('## Failed Tests');
+  lines.push('');
+
+  if (summary.failedTests.length === 0) {
+    lines.push('- No failed or broken tests detected.');
+  } else {
+    for (const failedTest of summary.failedTests) {
+      lines.push(`- ${failedTest.name} | ${failedTest.status} | ${failedTest.project}`);
+    }
+  }
+
+  lines.push('');
+  lines.push('## Release Assessment');
+  lines.push('');
+  lines.push(`- Release gate: ${summary.releaseGate}`);
+  lines.push(summary.releaseGate === 'PASS'
+    ? 'PASS - no failed or broken tests detected.'
+    : 'FAIL - execution contains failed/broken tests or no tests were executed.');
 
   return lines.join('\n') + '\n';
 }
