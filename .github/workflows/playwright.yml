@@ -1,12 +1,12 @@
-name: Playwright Regression
+name: Playwright Quality Gate
 
 on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Target environment'
+        description: Target environment
         required: true
-        default: 'qa'
+        default: qa
         type: choice
         options:
           - qa
@@ -14,9 +14,9 @@ on:
           - preprod
           - prod
       suite:
-        description: 'Suite to execute'
+        description: Application suite to execute
         required: true
-        default: 'smoke'
+        default: smoke
         type: choice
         options:
           - smoke
@@ -25,35 +25,55 @@ on:
           - ui
           - api
       client:
-        description: 'Optional client name for matrix-driven runs'
+        description: Optional client name for matrix-driven runs
         required: false
         default: ''
         type: string
+
   push:
-    branches: [ main ]
+    branches:
+      - main
+
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
-  test:
+  quality-gate:
+    name: Quality Gate
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        environment: [qa, regression]
+
     env:
-      ENV: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || matrix.environment }}
-      CLIENT_NAME: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.client || '' }}
+      ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'qa' }}
+      CLIENT_NAME: ${{ github.event_name == 'workflow_dispatch' && inputs.client || '' }}
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm ci
-      - run: npx playwright install --with-deps
-      - name: Run selected Playwright suite
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Compile TypeScript
+        run: npx tsc --noEmit
+
+      - name: Run framework quality tests
+        run: npm run test:framework
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run application quality gate
+        shell: bash
         run: |
-          SUITE="${{ github.event_name == 'workflow_dispatch' && github.event.inputs.suite || 'smoke' }}"
+          SUITE="${{ github.event_name == 'workflow_dispatch' && inputs.suite || 'smoke' }}"
+
           case "$SUITE" in
             smoke)
               npx playwright test --grep @smoke
@@ -71,18 +91,24 @@ jobs:
               npx playwright test --grep @api
               ;;
             *)
-              npx playwright test --grep @smoke
+              echo "Unsupported suite: $SUITE"
+              exit 1
               ;;
           esac
-      - name: Generate test summary
+
+      - name: Generate execution summary
         if: always()
         run: npm run report:summary
-      - uses: actions/upload-artifact@v4
+
+      - name: Publish execution evidence
         if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: playwright-report-${{ env.ENV }}
+          name: quality-gate-${{ env.ENV }}
           path: |
             playwright-report/
             test-results/
             allure-results/
             reports/
+          if-no-files-found: ignore
+          retention-days: 14
