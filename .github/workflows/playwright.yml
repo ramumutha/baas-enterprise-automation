@@ -71,6 +71,11 @@ jobs:
 
       - name: Run application quality gate
         shell: bash
+        env:
+          BANKING_DEMO_BANK_USERNAME: ${{ github.event_name == 'workflow_dispatch' && secrets.BANKING_DEMO_BANK_USERNAME || '' }}
+          BANKING_DEMO_BANK_PASSWORD: ${{ github.event_name == 'workflow_dispatch' && secrets.BANKING_DEMO_BANK_PASSWORD || '' }}
+          BANKING_REGRESSION_BANK_USERNAME: ${{ github.event_name == 'workflow_dispatch' && secrets.BANKING_REGRESSION_BANK_USERNAME || '' }}
+          BANKING_REGRESSION_BANK_PASSWORD: ${{ github.event_name == 'workflow_dispatch' && secrets.BANKING_REGRESSION_BANK_PASSWORD || '' }}
         run: |
           SUITE="${{ github.event_name == 'workflow_dispatch' && inputs.suite || 'smoke' }}"
 

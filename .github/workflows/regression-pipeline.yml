@@ -48,6 +48,11 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Run full application regression
+        env:
+             BANKING_DEMO_BANK_USERNAME: ${{ secrets.BANKING_DEMO_BANK_USERNAME }}
+             BANKING_DEMO_BANK_PASSWORD: ${{ secrets.BANKING_DEMO_BANK_PASSWORD }}
+             BANKING_REGRESSION_BANK_USERNAME: ${{ secrets.BANKING_REGRESSION_BANK_USERNAME }}
+             BANKING_REGRESSION_BANK_PASSWORD: ${{ secrets.BANKING_REGRESSION_BANK_PASSWORD }}
         run: npm run test:ci
 
       - name: Generate execution summary
