@@ -7,8 +7,13 @@ export class AccountOverviewPage extends BasePage {
 
   constructor(page: Page) {
     super(page);
-    this.pageHeading = page.locator('h1');
-    this.accountsTable = page.locator('table');
+    this.pageHeading = page.getByRole('heading', {
+      name: 'Accounts Overview',
+      exact: true
+    });
+    this.accountsTable = page.locator('table').filter({
+      hasText: 'Account Balance'
+    });
   }
 
   async verifyAccountsLoaded() {

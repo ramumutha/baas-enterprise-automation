@@ -19,19 +19,21 @@ export default defineConfig({
     ['list']
   ],
   use: {
-    baseURL: runtimeConfig.baseUrl,
-    trace: 'on-first-retry',
-    screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
-    extraHTTPHeaders: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    }
-  },
+  baseURL: runtimeConfig.baseUrl,
+  trace: 'on-first-retry',
+  screenshot: 'only-on-failure',
+  video: 'retain-on-failure'
+},
  projects: [
   {
     name: 'API-Suite',
-    testMatch: '**/api/**/*.spec.ts'
+    testMatch: '**/api/**/*.spec.ts',
+    use: {
+     extraHTTPHeaders: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+     }
+    }
   },
   {
     name: 'Chromium-UI',
