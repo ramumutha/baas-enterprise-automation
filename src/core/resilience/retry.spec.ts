@@ -1,4 +1,9 @@
 import { expect, test } from '@playwright/test';
+import {
+  isRetryableFailure,
+  PermanentFailureError,
+  TransientFailureError
+} from './failureClassification';
 import { retry, RetryExhaustedError } from './retry';
 
 test('returns on the first successful attempt', async () => {
@@ -149,4 +154,71 @@ test('negative delay fails before operation execution', async () => {
   })).rejects.toThrow('Retry configuration error: delayMs must be greater than or equal to 0.');
 
   expect(operationCalls).toBe(0);
+});
+
+test('retries a TransientFailureError when using isRetryableFailure', async () => {
+  let operationCalls = 0;
+
+  const result = await retry(() => {
+    operationCalls += 1;
+    if (operationCalls === 1) {
+      throw new TransientFailureError('Technical interaction failed');
+    }
+    return 'success';
+  }, {
+    attempts: 2,
+    delayMs: 0,
+    shouldRetry: isRetryableFailure
+  });
+
+  expect(result).toBe('success');
+  expect(operationCalls).toBe(2);
+});
+
+test('immediately rethrows PermanentFailureError when using isRetryableFailure', async () => {
+  const originalError = new PermanentFailureError('Login did not reach authenticated state');
+  let operationCalls = 0;
+
+  await expect(retry(() => {
+    operationCalls += 1;
+    throw originalError;
+  }, {
+    attempts: 2,
+    delayMs: 0,
+    shouldRetry: isRetryableFailure
+  })).rejects.toBe(originalError);
+
+  expect(operationCalls).toBe(1);
+});
+
+test('immediately rethrows unclassified errors when using isRetryableFailure', async () => {
+  const originalError = new Error('unclassified failure');
+  let operationCalls = 0;
+
+  await expect(retry(() => {
+    operationCalls += 1;
+    throw originalError;
+  }, {
+    attempts: 2,
+    delayMs: 0,
+    shouldRetry: isRetryableFailure
+  })).rejects.toBe(originalError);
+
+  expect(operationCalls).toBe(1);
+});
+
+test('throws RetryExhaustedError when transient failures exhaust attempts', async () => {
+  const finalError = new TransientFailureError('Technical interaction failed');
+
+  await expect(retry(() => {
+    throw finalError;
+  }, {
+    attempts: 2,
+    delayMs: 0,
+    shouldRetry: isRetryableFailure
+  })).rejects.toMatchObject({
+    name: 'RetryExhaustedError',
+    attempts: 2,
+    cause: finalError
+  });
 });
