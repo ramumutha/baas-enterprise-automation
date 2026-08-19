@@ -1,5 +1,5 @@
 import { Page, Locator, expect } from '@playwright/test';
-import { Logger } from '../../utils/Logger';
+import { Logger } from '../observability/Logger';
 
 export abstract class BasePage {
   readonly page: Page;
@@ -9,24 +9,24 @@ export abstract class BasePage {
   }
 
   async navigateTo(path: string) {
-    Logger.info(`Navigating to URL path: ${path}`);
+    Logger.info('BasePage', `Navigating to URL path: ${path}`);
     await this.page.goto(path);
   }
 
   async clickElement(locator: Locator, description: string) {
-    Logger.info(`Clicking: ${description}`);
+    Logger.info('BasePage', `Clicking: ${description}`);
     await locator.waitFor({ state: 'visible' });
     await locator.click();
   }
 
   async fillInput(locator: Locator, value: string, description: string) {
-    Logger.info(`Filling ${description} with value: ****`);
+    Logger.info('BasePage', `Filling ${description} with value: ****`);
     await locator.waitFor({ state: 'visible' });
     await locator.fill(value);
   }
 
   async verifyElementText(locator: Locator, expectedText: string) {
-    Logger.info(`Asserting element contains text: "${expectedText}"`);
+    Logger.info('BasePage', `Asserting element contains text: "${expectedText}"`);
     await expect(locator).toContainText(expectedText);
   }
 
