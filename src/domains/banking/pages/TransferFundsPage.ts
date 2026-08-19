@@ -17,13 +17,15 @@ export class TransferFundsPage extends BasePage {
 
   async openTransferPage() {
     await this.waitForPageReady();
-    await this.page.locator('a').filter({ hasText: 'Transfer Funds' }).first().click();
+    await this.clickElement(this.page.locator('a').filter({ hasText: 'Transfer Funds' }).first(), 'Transfer Funds Link');
   }
 
   async transferFunds(amount: string, fromAccount: string, toAccount: string) {
     await this.waitForPageReady();
     await this.fillInput(this.amountInput, amount, 'Transfer Amount');
+    await this.waitForVisible(this.fromAccountSelect);
     await this.fromAccountSelect.selectOption(fromAccount);
+    await this.waitForVisible(this.toAccountSelect);
     await this.toAccountSelect.selectOption(toAccount);
     await this.clickElement(this.transferButton, 'Transfer Button');
   }

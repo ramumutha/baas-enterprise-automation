@@ -15,14 +15,18 @@ export abstract class BasePage {
 
   async clickElement(locator: Locator, description: string) {
     Logger.info('BasePage', `Clicking: ${description}`);
-    await locator.waitFor({ state: 'visible' });
+    await this.waitForVisible(locator);
     await locator.click();
   }
 
   async fillInput(locator: Locator, value: string, description: string) {
     Logger.info('BasePage', `Filling ${description} with value: ****`);
-    await locator.waitFor({ state: 'visible' });
+    await this.waitForVisible(locator);
     await locator.fill(value);
+  }
+
+  async waitForVisible(locator: Locator): Promise<void> {
+    await locator.waitFor({ state: 'visible' });
   }
 
   async verifyElementText(locator: Locator, expectedText: string) {
@@ -32,6 +36,5 @@ export abstract class BasePage {
 
   async waitForPageReady() {
     await this.page.waitForLoadState('domcontentloaded');
-    await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => undefined);
   }
 }

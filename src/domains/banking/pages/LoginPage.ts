@@ -1,4 +1,4 @@
-import { Page, Locator } from '@playwright/test';
+import { errors, Page, Locator } from '@playwright/test';
 import {
   isRetryableFailure,
   PermanentFailureError,
@@ -6,7 +6,6 @@ import {
 } from '../../../core/resilience/failureClassification';
 import { BasePage } from '../../../core/ui/BasePage';
 import { retry } from '../../../core/resilience/retry';
-import { assertText, assertVisible } from '../../../utils/assertions';
 
 export class LoginPage extends BasePage {
   readonly usernameInput: Locator;
@@ -22,25 +21,31 @@ export class LoginPage extends BasePage {
 
   async login(username: string, pass: string) {
     await retry(async () => {
-      let currentUrl: string;
-      let bodyText: string;
-
       try {
         await this.page.goto('/parabank/index.htm');
         await this.fillInput(this.usernameInput, username, 'Username');
         await this.fillInput(this.passwordInput, pass, 'Password');
         await this.clickElement(this.loginButton, 'Log In Button');
-        await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => undefined);
-        await this.page.waitForTimeout(1000);
-
-        currentUrl = this.page.url();
-        bodyText = await this.page.locator('body').innerText().catch(() => '');
       } catch (error) {
         throw new TransientFailureError('Login technical interaction failed', error);
       }
 
-      if (currentUrl.includes('/overview.htm') || bodyText.includes('Accounts Overview') || bodyText.includes('Welcome')) {
+      try {
+        await this.page.waitForURL(/\/overview\.htm/, { timeout: 10000 });
         return true;
+      } catch (error) {
+        if (!(error instanceof errors.TimeoutError)) {
+          throw new TransientFailureError('Login technical interaction failed', error);
+        }
+      }
+
+      try {
+        const bodyText = await this.page.locator('body').innerText();
+        if (bodyText.includes('Accounts Overview') || bodyText.includes('Welcome')) {
+          return true;
+        }
+      } catch (error) {
+        throw new TransientFailureError('Login technical interaction failed', error);
       }
 
       throw new PermanentFailureError('Login did not reach authenticated state');
@@ -52,8 +57,5 @@ export class LoginPage extends BasePage {
         await this.page.reload().catch(() => undefined);
       }
     });
-
-    await assertVisible(this.usernameInput);
-    await assertText(this.page.locator('body'), 'Customer Login');
   }
 }
