@@ -1,4 +1,4 @@
-name: Playwright Quality Gate
+﻿name: Playwright Quality Gate
 
 on:
   workflow_dispatch:
@@ -69,6 +69,9 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
+      - name: Clean previous execution evidence
+        run: npm run report:clean
+
       - name: Run application quality gate
         shell: bash
         env:
@@ -109,11 +112,11 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: quality-gate-${{ env.ENV }}
+          name: quality-gate-${{ env.ENV }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             playwright-report/
             test-results/
             allure-results/
             reports/
-          if-no-files-found: ignore
+          if-no-files-found: error
           retention-days: 14

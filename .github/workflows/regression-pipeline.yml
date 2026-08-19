@@ -1,4 +1,4 @@
-name: Enterprise Regression Pipeline
+﻿name: Enterprise Regression Pipeline
 
 on:
   schedule:
@@ -47,6 +47,9 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
+      - name: Clean previous execution evidence
+        run: npm run report:clean
+
       - name: Run full application regression
         env:
              BANKING_DEMO_BANK_USERNAME: ${{ secrets.BANKING_DEMO_BANK_USERNAME }}
@@ -67,12 +70,12 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: regression-evidence-${{ env.ENV }}
+          name: regression-evidence-${{ env.ENV }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             allure-report/
             playwright-report/
             test-results/
             allure-results/
             reports/
-          if-no-files-found: ignore
+          if-no-files-found: error
           retention-days: 30
