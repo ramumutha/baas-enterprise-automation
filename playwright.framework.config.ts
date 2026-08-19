@@ -6,7 +6,8 @@ export default defineConfig({
   testMatch: [
     '**/core/security/*.spec.ts',
     '**/domains/banking/testdata/*.spec.ts',
-    '**/core/observability/*.spec.ts'
+    '**/core/observability/*.spec.ts',
+    '**/core/resilience/*.spec.ts'
   ],
 
   fullyParallel: false,

@@ -1,6 +1,6 @@
 import { Page, Locator } from '@playwright/test';
 import { BasePage } from '../../../core/ui/BasePage';
-import { retry } from '../../../utils/retry';
+import { retry } from '../../../core/resilience/retry';
 import { assertText, assertVisible } from '../../../utils/assertions';
 
 export class LoginPage extends BasePage {
@@ -34,7 +34,9 @@ export class LoginPage extends BasePage {
     }, {
       attempts: 2,
       delayMs: 1000,
-      onRetry: () => this.page.reload().catch(() => undefined)
+      onRetry: async () => {
+        await this.page.reload().catch(() => undefined);
+      }
     });
 
     await assertVisible(this.usernameInput);
