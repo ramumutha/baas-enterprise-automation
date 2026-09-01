@@ -7,6 +7,10 @@ console.log(
   `[TARGET ENVIRONMENT]: Executing tests on ${runtimeConfig.environment.toUpperCase()} -> ${runtimeConfig.baseUrl}`
 );
 
+// Transactional (state-changing) tests require explicit opt-in; never enabled by default.
+const runTransactional = process.env.RUN_TRANSACTIONAL === 'true';
+const excludeTransactional = /@transactional/;
+
 export default defineConfig({
   testDir: './src/tests',
   fullyParallel: true,
@@ -38,12 +42,16 @@ export default defineConfig({
   {
     name: 'Chromium-UI',
     use: { ...devices['Desktop Chrome'] },
-    testIgnore: '**/api/**/*.spec.ts'
+    testIgnore: '**/api/**/*.spec.ts',
+    // Only Chromium may opt in to @transactional tests, and only when explicitly requested.
+    grepInvert: runTransactional ? undefined : excludeTransactional
   },
   {
     name: 'Firefox-UI',
     use: { ...devices['Desktop Firefox'] },
-    testIgnore: '**/api/**/*.spec.ts'
+    testIgnore: '**/api/**/*.spec.ts',
+    // Firefox never runs @transactional tests against the shared QA customer.
+    grepInvert: excludeTransactional
   }
 ]
 });

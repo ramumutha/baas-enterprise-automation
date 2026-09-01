@@ -6,12 +6,19 @@ export type TransferAccountAvailability = {
   toAccounts: string[];
 };
 
+export type TransferAccountPair = {
+  fromAccount: string;
+  toAccount: string;
+};
+
 export class TransferFundsPage extends BasePage {
   readonly pageHeading: Locator;
   readonly fromAccountSelect: Locator;
   readonly toAccountSelect: Locator;
   readonly amountInput: Locator;
   readonly transferButton: Locator;
+  readonly transferCompleteHeading: Locator;
+  readonly transferResultPanel: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -25,6 +32,11 @@ export class TransferFundsPage extends BasePage {
     this.toAccountSelect = page.locator('#toAccountId');
     this.amountInput = page.locator('#amount');
     this.transferButton = page.locator('input[value="Transfer"]');
+    this.transferCompleteHeading = page.getByRole('heading', {
+      name: 'Transfer Complete!',
+      exact: true
+    });
+    this.transferResultPanel = page.locator('#rightPanel');
   }
 
   async openTransferPage(): Promise<void> {
@@ -75,6 +87,29 @@ export class TransferFundsPage extends BasePage {
     };
   }
 
+  async selectDistinctTransferAccounts(): Promise<TransferAccountPair> {
+    const availability = await this.getTransferAccountAvailability();
+    const eligibleAccounts = [
+      ...new Set(
+        availability.fromAccounts.filter((account) =>
+          availability.toAccounts.includes(account)
+        )
+      )
+    ];
+    const [fromAccount, toAccount] = eligibleAccounts;
+
+    if (!fromAccount || !toAccount || fromAccount === toAccount) {
+      throw new Error(
+        `Transfer precondition unavailable: expected at least two distinct accounts in both selectors, found ${eligibleAccounts.length}`
+      );
+    }
+
+    await this.fromAccountSelect.selectOption(fromAccount);
+    await this.toAccountSelect.selectOption(toAccount);
+
+    return { fromAccount, toAccount };
+  }
+
   async transferFunds(
     amount: string,
     fromAccount: string,
@@ -98,5 +133,16 @@ export class TransferFundsPage extends BasePage {
       this.transferButton,
       'Transfer Button'
     );
+  }
+
+  async verifyTransferComplete(
+    amount: string,
+    fromAccount: string,
+    toAccount: string
+  ): Promise<void> {
+    await expect(this.transferCompleteHeading).toBeVisible();
+    await expect(this.transferResultPanel).toContainText(amount);
+    await expect(this.transferResultPanel).toContainText(fromAccount);
+    await expect(this.transferResultPanel).toContainText(toAccount);
   }
 }

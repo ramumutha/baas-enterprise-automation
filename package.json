@@ -13,6 +13,7 @@
     "test:critical": "dotenv -e .env.qa -- npx playwright test --grep @critical",
     "test:matrix": "dotenv -e .env.qa -- npx playwright test --grep @matrix",
   "test:ci": "npx playwright test",
+"test:transactional": "dotenv -e .env.qa -v RUN_TRANSACTIONAL=true -- npx playwright test --grep @transactional --project=Chromium-UI --workers=1",
 "test:framework": "playwright test --config=playwright.framework.config.ts",
 "test:report": "npm run report:clean && npm run test:ci && npm run report:summary",
 "report": "npx allure serve allure-results",

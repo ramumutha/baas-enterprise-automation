@@ -151,4 +151,48 @@ test.describe('@Regression - Core Banking Workflows', () => {
       ).toBeGreaterThan(0);
     }
   );
+
+  test(
+    'TC_REG_06: Verify authenticated customer can complete controlled funds transfer',
+    {
+      tag: [
+        '@regression',
+        '@critical',
+        '@authenticated',
+        '@transfer',
+        '@transactional'
+      ]
+    },
+    async ({ loginPage, transferPage, clientConfig }) => {
+      const credentials = resolveBankingCredentials(
+        clientConfig
+      );
+
+      await loginPage.login(
+        credentials.username,
+        credentials.password
+      );
+
+      await transferPage.openTransferPage();
+
+      const accountPair =
+        await transferPage.selectDistinctTransferAccounts();
+
+      expect(accountPair.fromAccount).not.toBe(
+        accountPair.toAccount
+      );
+
+      await transferPage.transferFunds(
+        '1.00',
+        accountPair.fromAccount,
+        accountPair.toAccount
+      );
+
+      await transferPage.verifyTransferComplete(
+        '1.00',
+        accountPair.fromAccount,
+        accountPair.toAccount
+      );
+    }
+  );
 });
